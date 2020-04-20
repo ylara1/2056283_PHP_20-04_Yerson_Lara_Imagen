@@ -1,0 +1,99 @@
+<?php
+class Imagen{
+    private $alto;
+    private $ancho;
+    private $formato;
+    private $mime;
+
+    //arreglo de almacenamiento de propiedades
+    private $propiedades;
+    //representacion binaria
+    private $rb;
+
+    //metodos magicos: 
+    //metodos que se ejecutan sin llamarlos
+    //accesor universal
+
+    public function __get($name){
+        return $this->$name;
+    } 
+    
+    //metodo magico __set(): grabar
+
+    public function __set($name, $val)
+    {
+        $this-> $name = $val;
+
+
+    }
+    //se ejecuta automaticamente cuando se encuentra la palabra new
+
+    public function __construct($nombreimagen)
+    {
+        $this->propiedades=getimagesize("img/$nombreimagen");
+        $this->alto= $this ->propiedades[0];
+        $this->ancho=$this ->propiedades[1];
+        $this->formato=$this ->propiedades[2];
+        $this->mime = $this ->propiedades["mime"];
+
+        //crear la representacion binaria
+        switch ($this ->formato) {
+            case IMAGETYPE_JPEG:
+                //Representacion JPEG
+                $this->rb = imagecreatefromjpeg("img/$nombreimagen");
+            break;
+            case IMAGETYPE_GIF:
+                $this->rb = imagecreatefromgif("img/$nombreimagen");
+            break;
+            case IMAGETYPE_PNG:
+                $this->rb = imagecreatefrompng("img/$nombreimagen");
+            break;
+        }
+        //var_dump($this->rb);
+    }
+    public function getimagen()
+    {
+        //Establecer el tipo mime
+        header("Content-type: $this->mime");
+        //Mostrar imagen
+        switch ($this ->formato) {
+            case IMAGETYPE_JPEG:
+                //Representacion JPEG
+                imagejpeg($this ->rb);
+            break;
+            case IMAGETYPE_GIF:
+                imagegif($this ->rb);
+            break;
+            case IMAGETYPE_PNG:
+                imagepng($this ->rb);
+            break;
+        }
+    }
+
+    public function grayscale()
+    {
+        imagefilter($this ->rb , IMG_FILTER_GRAYSCALE);
+    }
+
+    public function rotar($angulo)
+    {
+        $rotada = imagerotate($this->rb, $angulo,0);
+        $this->rb = $rotada;
+    }
+
+    public function sepiafilter()
+    {
+        imagefilter($this ->rb ,IMG_FILTER_GRAYSCALE);
+        imagefilter($this ->rb , IMG_FILTER_BRIGHTNESS, -30);
+        imagefilter($this ->rb , IMG_FILTER_COLORIZE,95,55,10);
+    }
+
+
+}
+    $i = new Imagen("Mother3.jpg");
+    //asignar valor
+    // obtener valor
+    $i -> sepiafilter();
+    $i ->getimagen();
+    ?>
+                
